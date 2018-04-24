@@ -1,24 +1,17 @@
-# function to check whether 
+# function to check factors
 check_factors <- function(object, data, xvar, dx) {
     # check factors
     classes <- attributes(terms(object))[["dataClasses"]][-1]
     classes <- classes[names(classes) != "(weights)"]
     classes[classes == "character"] <- "factor"
-    nnames <- clean_terms(names(classes)[classes != "factor"])
-    fnames <- clean_terms(names(classes)[classes == "factor"])
-    fnames2 <- names(classes)[classes == "factor"] # for checking stupid variable naming behavior by R
     
-    # subset data
-    data <- data[, c(nnames, fnames2), drop = FALSE]
-    names(data)[names(data) %in% fnames2] <- fnames
+    varslist <- find_terms_in_model(model = object)
     
-    list(classes = classes,
-         nnames = nnames,
-         fnnames = fnames,
-         fnnames2 = fnames2, 
-         x_is_factor = (xvar %in% c(fnames, fnames2)),
-         dx_is_factor = (dx %in% c(fnames, fnames2)),
-         data = data)
+    c(list(classes = classes),
+      varslist,
+      x_is_factor = xvar %in% varslist$fnames,
+      dx_is_factor = dx %in% varslist$fnames,
+      list(data = data[, c(varslist$nnames, varslist$fnames), drop = FALSE]))
 }
 
 # PLOTTING UTILITY FUNCTIONS FOR cplot()
@@ -26,7 +19,6 @@ check_factors <- function(object, data, xvar, dx) {
 # function to setup plot
 setup_cplot <- 
 function(plotdat, data, 
-         xvals,
          xvar,
          yvar, 
          xlim, ylim, 
@@ -43,9 +35,9 @@ function(plotdat, data,
          ...) {
     if (is.null(xlim)) {
         if (isTRUE(x_is_factor)) {
-            xlim <- c(0.75, length(xvals) + 0.25)
+            xlim <- c(0.75, nrow(plotdat) + 0.25)
         } else {
-            xlim <- range(data[[xvar]], na.rm = TRUE)
+            xlim <- range(plotdat[["xvals"]], na.rm = TRUE)
         }
     }
     
@@ -66,14 +58,14 @@ function(plotdat, data,
             plot(NA, xlab = xlab, ylab = ylab, xaxt = "n", 
                  xaxs = xaxs, yaxs = yaxs, las = las, xlim = xlim, ylim = ylim, ...)
         }
-        axis(1, at = seq_along(xvals), labels = xvals, las = las)
+        axis(1, at = seq_along(plotdat[["xvals"]]), labels = plotdat[["xvals"]], las = las)
     } else {
         if (isTRUE(y_is_factor)) {
             plot(NA, xlab = xlab, ylab = ylab, yaxt = "n",
                  xaxs = xaxs, yaxs = yaxs, las = las, xlim = xlim, ylim = ylim, ...)
             axis(2, at = seq_len(nlevels(plotdat[["yvals"]])), labels = levels(plotdat[["yvals"]]), las = las)
         } else {
-            plot(NA, xlab = xlab, ylab = ylab, 
+            plot(NA, xlab = xlab, ylab = ylab,
                  xaxs = xaxs, yaxs = yaxs, las = las, xlim = xlim, ylim = ylim, ...)
         }
         if (isTRUE(scatter)) {

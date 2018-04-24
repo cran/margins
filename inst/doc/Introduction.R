@@ -20,6 +20,9 @@ x <- lm(mpg ~ cyl + hp * wt, data = mtcars)
 margins(x)
 
 ## -------------------------------------------------------------------------------------------------
+summary(margins(x, variables = "hp"))
+
+## -------------------------------------------------------------------------------------------------
 x <- glm(am ~ cyl + hp * wt, data = mtcars, family = binomial)
 margins(x, type = "response")
 margins(x, type = "link") # the default
@@ -36,8 +39,7 @@ x <- lm(mpg ~ wt + I(wt^2), data = mtcars)
 summary(x)
 
 ## ---- results = "hold"----------------------------------------------------------------------------
-wt_tmp <- fivenum(mtcars$wt)
-margins(x, at = list(wt = wt_tmp))
+margins(x, at = list(wt = fivenum(mtcars$wt)))
 
 ## -------------------------------------------------------------------------------------------------
 cplot(x, "wt", what = "prediction", main = "Predicted Fuel Economy, Given Weight")
@@ -53,7 +55,11 @@ x <- lm(mpg ~ factor(cyl) * am + hp + wt, data = mtcars)
 margins(x, data = mtcars[mtcars$am == 0, ])
 
 # manual vehicles
-margins(x, data = mtcars[mtcars$am == 0, ])
+margins(x, data = mtcars[mtcars$am == 1, ])
+
+## -------------------------------------------------------------------------------------------------
+m <- margins(x)
+split(m, m$am)
 
 ## ---- results = "hold"----------------------------------------------------------------------------
 x <- lm(mpg ~ cyl + wt * am, data = mtcars)
@@ -73,7 +79,6 @@ persp(x, "cyl", "wt", theta = c(0, 90))
 image(x, "cyl", "wt")
 
 ## -------------------------------------------------------------------------------------------------
-library("margins")
 summary(lm(mpg ~ drat:wt, data = mtcars))
 summary(lm(mpg ~ drat * wt, data = mtcars))
 
@@ -85,9 +90,9 @@ summary(margins(x1))
 margins(x1, at = list(drat = range(mtcars$drat)))
 
 ## -------------------------------------------------------------------------------------------------
-wts <- seq(range(mtcars$wt)[1], range(mtcars$wt)[2], length.out = 10)
+wts <- prediction::seq_range(mtcars$wt, 10)
 m1 <- margins(x1, at = list(wt = wts, drat = range(mtcars$drat), am = 0:1))
-length(unique(m1[[".at"]]))
+nrow(m1)/nrow(mtcars)
 
 ## ---- fig.height=4, fig.width=8-------------------------------------------------------------------
 cplot(x1, x = "wt", dx = "drat", what = "effect", 

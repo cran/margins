@@ -24,10 +24,6 @@ x <- lm(mpg ~ cyl + I(hp^2) + wt, data = mtcars)
 summary(margins(x))
 
 ## -------------------------------------------------------------------------------------------------
-library("margins")
-options(width = 100)
-
-## -------------------------------------------------------------------------------------------------
 x <- glm(am ~ cyl + hp + wt, data = mtcars, family = binomial)
 # AME
 summary(margins(x, type = "response"))

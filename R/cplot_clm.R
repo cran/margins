@@ -1,17 +1,17 @@
 #' @rdname cplot
 #' @importFrom stats stepfun
 #' @export
-cplot.polr <-
+cplot.clm <-
 function(object, 
-         x = attributes(terms(object))[["term.labels"]][1L],
-         dx = x, 
+         x = attributes(terms(object))[["term.labels"]][1L], #ok
+         dx = x,                                              #ok
          what = c("prediction", "classprediction", "stackedprediction", "effect"), 
-         data = prediction::find_data(object),
+         data = prediction::find_data(object), #ok
          type = c("response", "link"), 
-         vcov = stats::vcov(object),
+         vcov = stats::vcov(object), # different order to polr
          at,
          n = 25L,
-         xvals = seq_range(data[[x]], n = n),
+         xvals = seq_range(data[[x]], n = n),  
          level = 0.95,
          draw = TRUE,
          xlab = x, 
@@ -40,10 +40,10 @@ function(object,
          ...) {
     
     xvar <- x
-    yvar <- as.character(attributes(terms(object))[["variables"]][[2]])
+    yvar <- as.character(attributes(terms(object))[["variables"]][[2]]) #ok
     
     # handle factors and subset data
-    f <- check_factors(object = object, data = data, xvar = xvar, dx = dx)
+    f <- check_factors(object = object, data = data, xvar = xvar, dx = dx) #ok
     x_is_factor <- f[["x_is_factor"]]
     dx_is_factor <- f[["dx_is_factor"]]
     dat <- f[["data"]]
@@ -79,11 +79,12 @@ function(object,
             out <- list(out)
         } else {
             out <- list()
-            for (i in seq_len(length(outdat))[-c(1L:2L)]) {
-                if (what == "stackedprediction" && i != 3) {
-                    outdat[[i]] <- outdat[[i]] + outdat[[i-1L]]
+            preds <- grep("Pr", names(outdat))
+            for (i in preds) {
+                if (what == "stackedprediction" && i != preds[1L]) {
+                    outdat[[i]] <- outdat[[i]] + outdat[[i - 1L]]
                 }
-                out[[i-2L]] <- structure(list(xvals = xvals,
+                out[[i - preds[1] + 1]] <- structure(list(xvals = xvals,
                                               yvals = outdat[[i]],
                                               level = names(outdat)[i]),
                                       class = "data.frame", 
@@ -91,7 +92,7 @@ function(object,
             }
         }
     } else if (what == "effect") {
-        stop("Displaying marginal effects is not currently supported for 'polr' models!")
+        stop("Displaying marginal effects is not currently supported for 'clm' models!")
     }
     
     # optionally draw the plot; if FALSE, just the data are returned
@@ -102,10 +103,11 @@ function(object,
         } else {
             y_is_factor <- FALSE
         }
-        setup_cplot(plotdat = out[[1L]], data = data, xvals = xvals, xvar = xvar, yvar = yvar,
+      
+        setup_cplot(plotdat = out[[1L]], data = data, xvar = xvar, yvar = yvar,
                     xlim = xlim, ylim = ylim, x_is_factor = x_is_factor, y_is_factor = y_is_factor,
                     xlab = xlab, ylab = ylab, xaxs = xaxs, yaxs = yaxs, las = las,
-                    scatter = scatter, scatter.pch = scatter.pch, scatter.col = scatter.col, ...)
+                    scatter = scatter, scatter.pch = scatter.pch, scatter.col = scatter.col)
     }
     if (isTRUE(draw) || draw == "add") {
         if (length(lty) != length(out)) {
@@ -133,6 +135,7 @@ function(object,
                      factor.lty = factor.lty, factor.pch = factor.pch, 
                      factor.fill = factor.fill[i], 
                      factor.col = factor.col[i], factor.cex = factor.cex)
+          
         }
         if (isTRUE(rug) && is.numeric(data[[x]])) {
             draw_rug(data[[x]], rug.size = rug.size, rug.col = rug.col)
@@ -141,8 +144,5 @@ function(object,
     
     # return data used in plot
     invisible(do.call("rbind", out))
+#    invisible(out)
 }
-
-#' @rdname cplot
-#' @export
-cplot.multinom <- cplot.polr
