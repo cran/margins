@@ -1,3 +1,15 @@
+# margins 0.3.23
+
+* Fix a small issue in `print()` and `summary()` methods related to the release of prediction 0.3.6.
+
+# margins 0.3.22
+
+* Expanded support for objects of class "merMod" from **lme4**, including support for variance estimation and an expanded test suite. (#56)
+
+# margins 0.3.21
+
+* Modified the internals of `gradient_factory()` to be more robust to an expanded set of model classes through the introduction of an internal function `reset_coefs()`. A test suite for this function has been added.
+
 # margins 0.3.20
 
 * Added support for objects of class "ivreg" from **AER**.
