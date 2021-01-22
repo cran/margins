@@ -1,10 +1,13 @@
-## ----margins-------------------------------------------------------------
+## ----margins------------------------------------------------------------------
 library("margins")
 x <- lm(mpg ~ cyl * hp + wt, data = mtcars)
 (m <- margins(x))
 summary(m)
 
-## ----marginsplot---------------------------------------------------------
+## ----margins_summary----------------------------------------------------------
+margins_summary(x)
+
+## ----marginsplot--------------------------------------------------------------
 plot(m)
 
 ## ---- echo = FALSE, results = 'hide'--------------------------------------------------------------
@@ -24,8 +27,8 @@ summary(margins(x, variables = "hp"))
 
 ## -------------------------------------------------------------------------------------------------
 x <- glm(am ~ cyl + hp * wt, data = mtcars, family = binomial)
-margins(x, type = "response")
-margins(x, type = "link") # the default
+margins(x, type = "response") # the default
+margins(x, type = "link")
 
 ## ---- results = "hold"----------------------------------------------------------------------------
 x <- lm(mpg ~ cyl + wt + hp * am, data = mtcars)

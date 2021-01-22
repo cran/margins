@@ -1,6 +1,6 @@
 #' @rdname cplot
 #' @title Conditional predicted value and average marginal effect plots for models
-#' @description Draw one or more conditioanl effects plots reflecting predictions or marginal effects from a model, conditional on a covariate. Currently methods exist for \dQuote{lm}, \dQuote{glm}, \dQuote{loess} class models.
+#' @description Draw one or more conditional effects plots reflecting predictions or marginal effects from a model, conditional on a covariate. Currently methods exist for \dQuote{lm}, \dQuote{glm}, \dQuote{loess} class models.
 #' @param object A model object.
 #' @param x A character string specifying the name of variable to use as the x-axis dimension in the plot.
 #' @param dx If \code{what = "effect"}, the variable whose conditional marginal effect should be displayed. By default it is \code{x} (so the plot displays the marginal effect of \code{x} across values of \code{x}); ignored otherwise. If \code{dx} is a factor with more than 2 levels, an error will be issued.
@@ -44,6 +44,8 @@
 #' @param \dots Additional arguments passed to \code{\link[graphics]{plot}}. 
 #' @details Note that when \code{what = "prediction"}, the plots show predictions holding values of the data at their mean or mode, whereas when \code{what = "effect"} average marginal effects (i.e., at observed values) are shown.
 #' 
+#' When examining generalized linear models (e.g., logistic regression models), confidence intervals for predictions can fall outside of the response scale (again, for logistic regression this means confidence intervals can exceed the (0,1) bounds). This is consistent with the behavior of \code{\link[stats]{predict}} but may not be desired. The examples (below) show ways of constraining confidence intervals to these bounds.
+#' 
 #' The overall aesthetic is somewhat similar to to the output produced by the \code{marginalModelPlot()} function in the \bold{\href{https://cran.r-project.org/package=car}{car}} package.
 #' 
 #' @return A tidy data frame containing the data used to draw the plot. Use \code{draw = FALSE} to simply generate the data structure for use elsewhere.
@@ -80,9 +82,19 @@
 #'          geom_line(aes(y = effect + 1.96*se.effect)) + 
 #'          geom_line(aes(y = effect - 1.96*se.effect))
 #' }
+#' 
 #' # a non-linear model
 #' m <- glm(am ~ wt*drat, data = mtcars, family = binomial)
-#' cplot(m, x = "wt") # prediction
+#' cplot(m, x = "wt") # prediction (response scale)
+#' cplot(m, x = "wt") # prediction (link scale)
+#' if (require("ggplot2")) {
+#'   # prediction (response scale, constrained to [0,1])
+#'   cplotdat <- cplot(m, x = "wt", type = "link", draw = FALSE)
+#'   ggplot(cplotdat, aes(x = xvals, y = plogis(yvals))) + 
+#'          geom_line(lwd = 1.5) + 
+#'          geom_line(aes(y = plogis(upper))) + 
+#'          geom_line(aes(y = plotis(lower)))
+#' }
 #' 
 #' # effects on linear predictor and outcome
 #' cplot(m, x = "drat", dx = "wt", what = "effect", type = "link")
@@ -134,7 +146,7 @@ cplot <- function(object, ...) {
 
 #' @rdname cplot
 #' @export
-cplot.lm <- 
+cplot.default <- 
 function(object, 
          x = attributes(terms(object))[["term.labels"]][1L],
          dx = x, 
@@ -181,6 +193,7 @@ function(object,
     yvar <- as.character(attributes(terms(object))[["variables"]][[2]])
     
     # handle factors and subset data
+    data <- force(data)
     f <- check_factors(object, data, xvar = xvar, dx = dx)
     x_is_factor <- f[["x_is_factor"]]
     dx_is_factor <- f[["dx_is_factor"]]
@@ -201,11 +214,11 @@ function(object,
     type <- match.arg(type)
     a <- (1 - level)/2
     fac <- qnorm(c(a, 1 - a))
-
+    
     # setup `outdat` data
     if (what == "prediction") {
         # generates predictions as mean/mode of all variables rather than average prediction!
-        tmpdat <- lapply(dat[, names(dat) != xvar, drop = FALSE], mean_or_mode)
+        tmpdat <- lapply(dat[, names(dat) != xvar, drop = FALSE], prediction::mean_or_mode)
         tmpdat <- structure(lapply(tmpdat, rep, length.out = length(xvals)),
                             class = "data.frame", row.names = seq_len(length(xvals)))
         tmpdat[[xvar]] <- xvals
@@ -215,7 +228,6 @@ function(object,
                               upper = outdat[["fitted"]] + (fac[2] * outdat[["se.fitted"]]),
                               lower = outdat[["fitted"]] + (fac[1] * outdat[["se.fitted"]])),
                          class = "data.frame", row.names = seq_along(outdat[["fitted"]]))
-        print(head(out, 20))
     } else if (what == "effect") {
         if (is.factor(dat[[dx]]) && nlevels(data[[dx]]) > 2L) {
             stop("Displaying effect of a factor variable with > 2 levels is not currently supported!")
@@ -233,9 +245,9 @@ function(object,
                     scatter = scatter, scatter.pch = scatter.pch, scatter.col = scatter.col, ...)
     }
     if (isTRUE(draw) || draw == "add") {
-        draw_one(xvals = out[["xvals"]], 
-                 yvals = out[["yvals"]], 
-                 upper = out[["upper"]], 
+        draw_one(xvals = out[["xvals"]],
+                 yvals = out[["yvals"]],
+                 upper = out[["upper"]],
                  lower = out[["lower"]],
                  x_is_factor = x_is_factor,
                  col = col, lty = lty, lwd = lwd,

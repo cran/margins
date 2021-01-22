@@ -1,9 +1,9 @@
-## ----opts, echo = FALSE, results = "hide"--------------------------------
+## ----opts, echo = FALSE, results = "hide"---------------------------------------------------------
 library("knitr")
 opts_knit$set(progress = TRUE, verbose = TRUE)
-opts_chunk$set(echo = FALSE, results = "hide", dev = "cairo_pdf", fig.height=7, fig.width=11, out.width='\\textwidth')
+opts_chunk$set(echo = FALSE, results = "hide", fig.height=7, fig.width=11, out.width='\\textwidth')
 
-## ----model1, results = "asis"--------------------------------------------
+## ----model1, results = "asis"---------------------------------------------------------------------
 library("gapminder")
 suppressPackageStartupMessages(library("stargazer"))
 gapminder[["pop"]] <- gapminder[["pop"]]/1e6
@@ -47,15 +47,15 @@ local({
   text(9, 40, expression(ME(x) == -26.4), cex = 2, col = "red")
 })
 
-## ----deriv, echo = TRUE, results = "show"--------------------------------
+## ----deriv, echo = TRUE, results = "show"---------------------------------------------------------
 deriv(y ~ b1*x1 + b2*x2 + b3*x3 + b4*x1*x2 + 
           b5*x2*x3 + b6*x1*x3 + b7*x1*x2*x3, 
       c("x1", "x2", "x3"))
 
-## ----deriv2, echo = TRUE, results = "show"-------------------------------
+## ----deriv2, echo = TRUE, results = "show"--------------------------------------------------------
 deriv(y ~ b1*x1 + b2*x1squared + b3*x2, c("x1", "x2"))
 
-## ----numderiv1, fig.cap = "Approximation of Derivative via One-Sided Numerical Approach"----
+## ----numderiv1, fig.cap = "Approximation of Derivative via One-Sided Numerical Approach"----------
 curve(x^2, from = -5, to = 4, lwd = 2, las = 1, 
      xlim = c(-1, 4), ylim = c(0,10), 
      xaxt = "n", yaxs = "i", yaxs = "i",
@@ -85,7 +85,7 @@ text(3.1, 2.5, expression(paste(frac(paste(Delta, y), paste(Delta, x)) == frac(f
 text(3.1, 1.5, expression(paste(frac(paste(Delta, y), paste(Delta, x)) == frac(f(1.25) - f(1), 0.25), " = 2.25")), pos = 4 )
 text(3.1, 0.5, "...", pos = 4)
 
-## ----numderiv2, fig.cap = "Approximation of Derivative via Two-Sided Numerical Approach"----
+## ----numderiv2, fig.cap = "Approximation of Derivative via Two-Sided Numerical Approach"----------
 curve(x^2, from = -5, to = 4, lwd = 2, las = 1, 
      xlim = c(-1, 4), ylim = c(0,10), 
      xaxt = "n", yaxs = "i", yaxs = "i",
@@ -113,55 +113,55 @@ text(3.1, 4, expression(paste(frac(paste(Delta, y), paste(Delta, x)) == frac(f(2
 text(3.1, 2.5, expression(paste(frac(paste(Delta, y), paste(Delta, x)) == frac(f(1.5) - f(0.5), 1), " = 2")), pos = 4 )
 text(3.1, 0.5, "...", pos = 4)
 
-## ----print, echo=TRUE, results = "show"----------------------------------
+## ----print, echo=TRUE, results = "show"-----------------------------------------------------------
 str(mar2 <- margins(m2))
 
-## ----summary, echo=TRUE, results = "show"--------------------------------
+## ----summary, echo=TRUE, results = "show"---------------------------------------------------------
 mar2
 summary(mar2)
 
-## ----margins1, echo = TRUE, results = "show"-----------------------------
+## ----margins1, echo = TRUE, results = "show"------------------------------------------------------
 library("datasets")
 m <- lm(mpg ~ wt + am + factor(cyl), data = mtcars)
 margins(m)
 summary(margins(m))
 
-## ----margins2, echo = TRUE, results = "show"-----------------------------
+## ----margins2, echo = TRUE, results = "show"------------------------------------------------------
 m <- lm(mpg ~ wt * am + I(wt^2) * am, data = mtcars)
 summary(margins(m, at = list(am = 0:1)))
 
-## ----margins3a, echo = TRUE, results = "show"----------------------------
+## ----margins3a, echo = TRUE, results = "show"-----------------------------------------------------
 m <- lm(mpg ~ wt * I(wt^2) * hp * I(hp^2), data = mtcars)
 margins(m)
 
-## ----margins3b, echo = TRUE, fig.show = "hold"---------------------------
+## ----margins3b, echo = TRUE, fig.show = "hold"----------------------------------------------------
 cplot(m, "wt")
 cplot(m, "hp")
 
-## ----margins3c, echo = TRUE, fig.show = "hold"---------------------------
+## ----margins3c, echo = TRUE, fig.show = "hold"----------------------------------------------------
 persp(m, "wt", "hp")
 image(m, "wt", "hp")
 
-## ----margins3d, echo = TRUE, results = "show"----------------------------
+## ----margins3d, echo = TRUE, results = "show"-----------------------------------------------------
 m <- lm(mpg ~ wt + am + factor(cyl), data = mtcars)
 plot(margins(m))
 
-## ----margins3e, echo = TRUE----------------------------------------------
+## ----margins3e, echo = TRUE-----------------------------------------------------------------------
 m <- lm(mpg ~ wt * I(wt^2) * hp * I(hp^2), data = mtcars)
 cplot(m, "wt", what = "effect")
 persp(m, "wt", "hp", what = "effect", phi = 30)
 image(m, "wt", "hp", what = "effect")
 
-## ----log1, results = "asis"----------------------------------------------
+## ----log1, results = "asis"-----------------------------------------------------------------------
 m3a <- lm(pop ~ loggdp, data = gapminder)
 m3b <- lm(pop ~ I(log(gdpPercap)), data = gapminder)
 stargazer(m3a, m3b, dep.var.labels = "Population Size",
           title = "Example of Log Transformation", 
           label = "tab:model3")
 
-## ----log2, echo = TRUE, results = "show"---------------------------------
+## ----log2, echo = TRUE, results = "show"----------------------------------------------------------
 summary(margins(m3b))
 
-## ----log3, echo = TRUE, results = "show"---------------------------------
+## ----log3, echo = TRUE, results = "show"----------------------------------------------------------
 summary(margins(m3a))
 

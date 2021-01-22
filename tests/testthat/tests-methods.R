@@ -44,6 +44,15 @@ if (requireNamespace("lme4")) {
         expect_true(inherits(margins(m), "margins"))
         expect_true(inherits(margins(m), "margins"))
     })
+    test_that("Test margins(vce = 'simulation') for 'lmerMod' (single grouping)", {
+        expect_true(inherits(margins(m, vce = "simulation", iterations = 5),
+                             "margins"))  
+    })
+    test_that("Test margins(vce = 'bootstrap') for 'lmerMod' (single grouping)", {
+        expect_true(inherits(suppressWarnings({
+            margins(m, vce = "bootstrap", iterations = 5)
+        }), "margins"))  
+    })
     # lmer with multiple random intercepts
     m <- lme4::lmer(weight ~ Diet + (1|Time) + (1|Chick), data = ChickWeight)
     test_that("Test marginal_effects() for 'lmerMod' (multiple grouping)", {
@@ -53,6 +62,15 @@ if (requireNamespace("lme4")) {
     test_that("Test margins() for 'lmerMod' (multiple grouping)", {
         expect_true(inherits(margins(m), "margins"))
         expect_true(inherits(margins(m), "margins"))
+    })
+    test_that("Test margins(vce = 'simulation') for 'lmerMod' (multiple grouping)", {
+        expect_true(inherits(margins(m, vce = "simulation", iterations = 5),
+                             "margins"))  
+    })
+    test_that("Test margins(vce = 'bootstrap') for 'lmerMod' (multiple grouping)", {
+        expect_true(inherits(suppressWarnings({
+            margins(m, vce = "bootstrap", iterations = 5)
+        }), "margins"))  
     })
     
     # lmer with random slopes
@@ -65,6 +83,15 @@ if (requireNamespace("lme4")) {
         expect_true(inherits(margins(m), "margins"))
         expect_true(inherits(margins(m), "margins"))
     })
+    test_that("Test margins(vce = 'simulation') for 'lmerMod' (random slopes)", {
+        expect_true(inherits(margins(m, vce = "simulation", iterations = 5),
+                             "margins"))  
+    })
+    test_that("Test margins(vce = 'bootstrap') for 'lmerMod' (random slopes)", {
+        expect_true(inherits(suppressWarnings({
+            margins(m, vce = "bootstrap", iterations = 5)
+        }), "margins"))  
+    })
     
     # generalized linear mixed effects models
     ChickWeight$high <- cut(ChickWeight$weight, 2)
@@ -76,6 +103,15 @@ if (requireNamespace("lme4")) {
     test_that("Test margins() for 'merMod'", {
         expect_true(inherits(margins(m), "margins"))
         expect_true(inherits(margins(m), "margins"))
+    })
+    test_that("Test margins(vce = 'simulation') for 'merMod'", {
+        expect_true(inherits(margins(m, vce = "simulation", iterations = 5),
+                             "margins"))  
+    })
+    test_that("Test margins(vce = 'bootstrap') for 'merMod'", {
+        expect_true(inherits(suppressWarnings({
+            margins(m, vce = "bootstrap", iterations = 5)
+        }), "margins"))  
     })
     
 }
@@ -96,6 +132,7 @@ if (requireNamespace("MASS")) {
 
 context("Test 'nnet' methods")
 if (requireNamespace("nnet")) {
+    # "nnet" objects
     data("iris3", package = "datasets")
     ird <- data.frame(rbind(iris3[,,1], iris3[,,2], iris3[,,3]),
                       species = factor(c(rep("s",50), rep("c", 50), rep("v", 50))))
@@ -109,11 +146,23 @@ if (requireNamespace("nnet")) {
         expect_true(inherits(margins(m), "margins"))
         expect_true(inherits(margins(m, category = "c"), "margins"))
     })
+    
+    # "multinom" objects
+    data("housing", package = "MASS")
+    m <- nnet::multinom(Sat ~ Infl + Type + Cont, weights = Freq, data = housing)
+    test_that("Test marginal_effects() for 'polr'", {
+        expect_true(inherits(marginal_effects(m), "data.frame"))
+        expect_true(inherits(marginal_effects(m, category = "Low"), "data.frame"))
+    })
+#    test_that("Test margins() for 'polr'", {
+#        expect_true(inherits(margins(m), "margins"))
+#        expect_true(inherits(margins(m, category = "Low"), "margins"))
+#    })
 }
 
 context("Test 'ordinal' methods")
 if (requireNamespace("ordinal")) {
-    test_that("Test marignal_effects() for 'clm'", {
+    test_that("Test marginal_effects() for 'clm'", {
         data("wine", package = "ordinal")
         m <- ordinal::clm(rating ~ temp * contact, data = wine)
         expect_true(inherits(marginal_effects(m), "data.frame"))

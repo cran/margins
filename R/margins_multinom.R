@@ -1,12 +1,12 @@
 #' @rdname margins
+#' @importFrom prediction find_data
 #' @export
-margins.svyglm <- 
+margins.multinom <- 
 function(model, 
          data = find_data(model, parent.frame()), 
-         design,
          variables = NULL,
          at = NULL, 
-         type = c("response", "link"),
+         type = NULL,
          vcov = stats::vcov(model),
          vce = c("delta", "simulation", "bootstrap", "none"),
          iterations = 50L, # if vce == "bootstrap" or "simulation"
@@ -14,22 +14,8 @@ function(model,
          eps = 1e-7,
          ...) {
     
-    # require survey
-    requireNamespace("survey")
-    
     # match.arg()
-    type <- match.arg(type)
     vce <- match.arg(vce)
-    
-    # `design` object
-    if (missing(design)) {
-        message("Note: Estimating marginal effects without survey weights. Specify 'design' to adjust for weighting.")
-        wts <- NULL
-    } else if (!inherits(design, "survey.design")) {
-        stop("'design' must be a 'survey.design' object for models of class 'svyglm'")
-    } else {
-        wts <- weights(design)
-    }
     
     # setup data
     data_list <- build_datalist(data, at = at)
@@ -51,12 +37,11 @@ function(model,
         out[[i]] <- build_margins(model = model,
                                   data = data_list[[i]],
                                   variables = variables,
-                                  type = type,
+                                  type = NULL,
                                   vcov = vcov,
                                   vce = vce,
                                   iterations = iterations,
                                   unit_ses = unit_ses,
-                                  weights = wts,
                                   eps = eps,
                                   varslist = varslist,
                                   ...)
@@ -65,6 +50,13 @@ function(model,
     if (vce == "delta") {
         jac <- do.call("rbind", lapply(out, attr, "jacobian"))
         rownames(jac) <- paste0(rownames(jac), ".", rep(seq_len(length(out)), each = length(unique(rownames(jac)))))
+        
+        # check that vcov() only contains coefficients from model
+        if (nrow(vcov) != length(coef(model))) {
+            vcov <- vcov[colnames(coef(model)), colnames(coef(model))]
+        }
+        
+        # sandwich
         vc <- jac %*% vcov %*% t(jac)
     } else {
         jac <- NULL
@@ -77,9 +69,10 @@ function(model,
               at = if (is.null(at)) NULL else at_specification,
               type = type,
               call = if ("call" %in% names(model)) model[["call"]] else NULL,
-              vce = vce,
+              model_class = class(model),
+              vce = vce, 
               vcov = vc,
               jacobian = jac,
-              weighted = if (is.null(wts)) FALSE else TRUE,
+              weighted = FALSE,
               iterations = if (vce == "bootstrap") iterations else NULL)
 }

@@ -5,6 +5,8 @@
 #' @title Marginal Effects Estimation
 #' @description This package is an R port of Stata's \samp{margins} command, implemented as an S3 generic \code{margins()} for model objects, like those of class \dQuote{lm} and \dQuote{glm}. \code{margins()} is an S3 generic function for building a \dQuote{margins} object from a model object. Methods are currently implemented for several model classes (see Details, below).
 #' 
+#' margins provides \dQuote{marginal effects} summaries of models. Marginal effects are partial derivatives of the regression equation with respect to each variable in the model for each unit in the data; average marginal effects are simply the mean of these unit-specific partial derivatives over some sample. In ordinary least squares regression with no interactions or higher-order term, the estimated slope coefficients are marginal effects. In other cases and for generalized linear models, the coefficients are not marginal effects at least not on the scale of the response variable. margins therefore provides ways of calculating the marginal effects of variables to make these models more interpretable.
+#' 
 #' The package also provides a low-level function, \code{\link{marginal_effects}}, to estimate those quantities and return a data frame of unit-specific effects and another even lower-level function, \code{\link{dydx}}, to provide variable-specific derivatives from models. Some of the underlying architecture for the package is provided by the low-level function \code{\link[prediction]{prediction}}, which provides a consistent data frame interface to \code{\link[stats]{predict}} for a large number of model types. If a \code{prediction} method exists for a model class, \code{margin} should work for the model class but only those classes listed here have been tested and specifically supported.
 #' @param model A model object. See Details for supported model classes.
 #' @param data A data frame containing the data at which to evaluate the marginal effects, as in \code{\link[stats]{predict}}. This is optional, but may be required when the underlying modelling function sets \code{model = FALSE}.
@@ -18,7 +20,11 @@
 #' @param unit_ses If \code{vce = "delta"}, a logical specifying whether to calculate and return unit-specific marginal effect variances. This calculation is time consuming and the information is often not needed, so this is set to \code{FALSE} by default.
 #' @param eps A numeric value specifying the \dQuote{step} to use when calculating numerical derivatives.
 #' @param \dots Arguments passed to methods, and onward to \code{\link{dydx}} methods and possibly further to \code{\link[prediction]{prediction}} methods. This can be useful, for example, for setting \code{type} (predicted value type), \code{eps} (precision), or \code{category} (category for multi-category outcome models), etc.
-#' @details Methods for this generic return a \dQuote{margins} object, which is a data frame consisting of the original data, predicted values and standard errors thereof, estimated marginal effects from the model \code{model} (for all variables used in the model, or the subset specified by \code{variables}), along with attributes describing various features of the marginal effects estimates. The default print method is concise; a more useful \code{summary} method provides additional details.
+#' @details Methods for this generic return a \dQuote{margins} object, which is a data frame consisting of the original data, predicted values and standard errors thereof, estimated marginal effects from the model \code{model} (for all variables used in the model, or the subset specified by \code{variables}), along with attributes describing various features of the marginal effects estimates.
+#' 
+#' The default print method is concise; a more useful \code{summary} method provides additional details.
+#' 
+#' \code{margins_summary} is sugar that provides a more convenient way of obtaining the nested call: \code{summary(margins(...))}.
 #' 
 #' Methods are currently implemented for the following object classes:
 #' \itemize{
@@ -44,7 +50,7 @@
 #' @references
 #' Greene, W.H. 2012. Econometric Analysis, 7th Ed. Boston: Pearson.
 #' 
-#' Stata manual: \code{margins}. Retrieved 2014-12-15 from \url{http://www.stata.com/manuals13/rmargins.pdf}.
+#' Stata manual: \code{margins}. Retrieved 2014-12-15 from \url{https://www.stata.com/manuals13/rmargins.pdf}.
 #' @examples
 #' # basic example using linear model
 #' require("datasets")
@@ -75,6 +81,7 @@
 #' 
 #' # summary() method
 #' summary(margins(x, at = list(hp = c(95, 150))))
+#' margins_summary(x, at = list(hp = c(95, 150)))
 #' ## control row order of summary() output
 #' summary(margins(x, at = list(hp = c(95, 150))), by_factor = FALSE)
 #' 
@@ -110,6 +117,11 @@
 #'   margins(m, category = "v") # explicit category
 #' }
 #'
+#' # using margins_summary() for concise grouped operations
+#' list_data <- split(mtcars, mtcars$gear)
+#' list_mod <- lapply(list_data, function(x) lm(mpg ~ cyl + wt, data = x))
+#' mapply(margins_summary, model = list_mod, data = list_data, SIMPLIFY = FALSE)
+#' 
 #' @seealso \code{\link{marginal_effects}}, \code{\link{dydx}}, \code{\link[prediction]{prediction}}
 #' @keywords models package
 #' @import stats
