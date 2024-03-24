@@ -1,4 +1,4 @@
-%\VignetteEngine{knitr}
+%\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{Technical Implementation Details}
 \documentclass[a4paper,12pt]{article}
 \usepackage[margin=1in]{geometry}

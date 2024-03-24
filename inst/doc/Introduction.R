@@ -10,7 +10,7 @@ margins_summary(x)
 ## ----marginsplot--------------------------------------------------------------
 plot(m)
 
-## ---- echo = FALSE, results = 'hide'--------------------------------------------------------------
+## ----echo = FALSE, results = 'hide'---------------------------------------------------------------
 options(width = 100)
 
 ## -------------------------------------------------------------------------------------------------
@@ -30,18 +30,18 @@ x <- glm(am ~ cyl + hp * wt, data = mtcars, family = binomial)
 margins(x, type = "response") # the default
 margins(x, type = "link")
 
-## ---- results = "hold"----------------------------------------------------------------------------
+## ----results = "hold"-----------------------------------------------------------------------------
 x <- lm(mpg ~ cyl + wt + hp * am, data = mtcars)
 margins(x, at = list(am = 0:1))
 
-## ---- results = "hold"----------------------------------------------------------------------------
+## ----results = "hold"-----------------------------------------------------------------------------
 margins(x, at = list(am = 0:1, hp = fivenum(mtcars$hp)))
 
-## ---- results = "hold"----------------------------------------------------------------------------
+## ----results = "hold"-----------------------------------------------------------------------------
 x <- lm(mpg ~ wt + I(wt^2), data = mtcars)
 summary(x)
 
-## ---- results = "hold"----------------------------------------------------------------------------
+## ----results = "hold"-----------------------------------------------------------------------------
 margins(x, at = list(wt = fivenum(mtcars$wt)))
 
 ## -------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ margins(x, data = mtcars[mtcars$am == 1, ])
 m <- margins(x)
 split(m, m$am)
 
-## ---- results = "hold"----------------------------------------------------------------------------
+## ----results = "hold"-----------------------------------------------------------------------------
 x <- lm(mpg ~ cyl + wt * am, data = mtcars)
 cplot(x, "cyl")
 cplot(x, "wt")
@@ -97,7 +97,7 @@ wts <- prediction::seq_range(mtcars$wt, 10)
 m1 <- margins(x1, at = list(wt = wts, drat = range(mtcars$drat), am = 0:1))
 nrow(m1)/nrow(mtcars)
 
-## ---- fig.height=4, fig.width=8-------------------------------------------------------------------
+## ----fig.height=4, fig.width=8--------------------------------------------------------------------
 cplot(x1, x = "wt", dx = "drat", what = "effect", 
       data = mtcars[mtcars[["am"]] == 0,], 
       col = "red", se.type = "shade",
@@ -108,7 +108,7 @@ cplot(x1, x = "wt", dx = "drat", what = "effect",
       col = "blue", se.type = "shade", 
       draw = "add")
 
-## ---- fig.height=4, fig.width=8-------------------------------------------------------------------
+## ----fig.height=4, fig.width=8--------------------------------------------------------------------
 x1b <- lm(mpg ~ am * wt + am * I(wt^2), data = mtcars)
 cplot(x1b, x = "wt", dx = "wt", what = "effect", 
       data = mtcars[mtcars[["am"]] == 0,], 
@@ -138,7 +138,7 @@ x1 <- lm(mpg ~ drat * wt * am, data = mtcars)
 cdat <- cplot(x1, "wt", draw = FALSE)
 head(cdat)
 
-## ---- fig.height=4, fig.width=8-------------------------------------------------------------------
+## ----fig.height=4, fig.width=8--------------------------------------------------------------------
 library("ggplot2")
 ggplot(cdat, aes(x = xvals)) + 
   geom_line(aes(y = yvals)) +
@@ -148,7 +148,7 @@ ggplot(cdat, aes(x = xvals)) +
   ggtitle("Predicted Fuel Economy (mpg) by Weight") +
   xlab("Weight (1000 lbs)") + ylab("Predicted Value")
 
-## ---- fig.height=4, fig.width=8-------------------------------------------------------------------
+## ----fig.height=4, fig.width=8--------------------------------------------------------------------
 cdat <- cplot(x1, "wt", "drat", what = "effect", draw = FALSE)
 ggplot(cdat, aes(x = xvals)) + 
   geom_line(aes(y = yvals)) +
@@ -177,7 +177,7 @@ persp(g1, theta = c(45, 135, 225, 315), what = "prediction")
 ## -------------------------------------------------------------------------------------------------
 persp(g1, theta = c(45, 135, 225, 315), what = "effect")
 
-## ---- echo = FALSE, fig.width=8, fig.height=4-----------------------------------------------------
+## ----echo = FALSE, fig.width=8, fig.height=4------------------------------------------------------
 g2 <- glm(type ~ age + skin, data = Pima.te, family = binomial)
 persp(g2, theta = c(45, 135, 225, 315), what = "prediction")
 persp(g2, theta = c(45, 135, 225, 315), what = "effect")
