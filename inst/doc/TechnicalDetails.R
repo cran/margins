@@ -2,9 +2,12 @@
 library("knitr")
 opts_knit$set(progress = TRUE, verbose = TRUE)
 opts_chunk$set(echo = FALSE, results = "hide", fig.height=7, fig.width=11, out.width='\\textwidth')
+has_pkgs <- requireNamespace("gapminder", quietly = TRUE) &&
+    requireNamespace("stargazer", quietly = TRUE)
+opts_chunk$set(eval  = has_pkgs)
 
 ## ----model1, results = "asis"---------------------------------------------------------------------
-library("gapminder")
+library(gapminder)
 suppressPackageStartupMessages(library("stargazer"))
 gapminder[["pop"]] <- gapminder[["pop"]]/1e6
 gapminder[["loggdp"]] <- log(gapminder[["gdpPercap"]])
