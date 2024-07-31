@@ -4,7 +4,7 @@ Title: Marginal Effects for Model Objects
 Description: An R port of the margins command from 'Stata', which can be used to
     calculate marginal (or partial) effects from model objects.
 License: MIT + file LICENSE
-Version: 0.3.27
+Version: 0.3.28
 Authors@R: c(person("Thomas J.", "Leeper",
                     role = c("aut"), 
                     comment = c(ORCID = "0000-0003-4097-6326")),
@@ -28,9 +28,10 @@ Suggests: methods, knitr, rmarkdown, testthat, ggplot2, gapminder,
 Enhances: AER, betareg, nnet, ordinal, survey
 ByteCompile: true
 VignetteBuilder: knitr
-RoxygenNote: 7.1.0
+Encoding: UTF-8
+RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2024-06-12 14:10:43 UTC; bolker
+Packaged: 2024-07-31 19:47:32 UTC; bolker
 Author: Thomas J. Leeper [aut] (<https://orcid.org/0000-0003-4097-6326>),
   Jeffrey Arnold [ctb],
   Vincent Arel-Bundock [ctb],
@@ -38,4 +39,4 @@ Author: Thomas J. Leeper [aut] (<https://orcid.org/0000-0003-4097-6326>),
   Ben Bolker [ctb, cre] (<https://orcid.org/0000-0002-2127-0443>)
 Maintainer: Ben Bolker <bolker@mcmaster.ca>
 Repository: CRAN
-Date/Publication: 2024-06-13 09:40:05 UTC
+Date/Publication: 2024-07-31 20:20:02 UTC
